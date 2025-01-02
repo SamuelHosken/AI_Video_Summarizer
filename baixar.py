@@ -3,13 +3,13 @@ import openai
 import os
 import time
 
-# Defina sua chave de API da OpenAI aqui
+
 openai.api_key = 'sk-x0Thqu7C7DCewOEiR6-F35E8SxHEZ1JNJ3u5Sp2jAsT3BlbkFJrihE3B3TBiXyuOkRRCsGgCz52sfQfn07xkb2Si5EIA'
 
 def deletar_audio(caminho_audio):
     try:
         if os.path.exists(caminho_audio):
-            os.remove(caminho_audio)  # Remove o arquivo
+            os.remove(caminho_audio)  
             print(f"Arquivo {caminho_audio} deletado com sucesso.")
         else:
             print(f"O arquivo {caminho_audio} não existe.")
@@ -18,7 +18,7 @@ def deletar_audio(caminho_audio):
 
 def baixar_audio_rapido(url, saida='audio_extraido.mp3'):
     print(f"Baixando o áudio de {url}...")
-    # Opções otimizadas para baixar o áudio mais rápido
+
     ydl_opts = {
         'format': 'bestaudio/best', 
         'outtmpl': saida,            
@@ -31,19 +31,19 @@ def baixar_audio_rapido(url, saida='audio_extraido.mp3'):
         'socket-timeout': 10,        
     }
 
-    # Baixando o áudio usando yt-dlp
+
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         result = ydl.download([url])
     
-    # Verificar se o arquivo foi criado
+
     if os.path.exists(saida):
         print(f"Áudio baixado com sucesso: {saida}")
         return saida
     else:
         print(f"Erro: O arquivo {saida} não foi encontrado após o download.")
-        # Tentar encontrar um arquivo baixado automaticamente
+
         base_name, _ = os.path.splitext(saida)
-        for ext in ['m4a', 'webm', 'mp3']:  # Checar as extensões mais comuns
+        for ext in ['m4a', 'webm', 'mp3']:  
             alternative_file = f"{base_name}.{ext}"
             if os.path.exists(alternative_file):
                 print(f"Arquivo encontrado: {alternative_file}")
@@ -78,7 +78,8 @@ def summarize_text(text):
                 "ou experiências de uso mencionadas.\n"
                 "Pontos Negativos: Identifique as críticas, dificuldades ou desvantagens mencionadas em relação a cada produto.\n"
                 "Conclusão: Com base nas análises feitas pelos reviewers, determine se o produto vale a pena ser adquirido e, caso haja "
-                "uma comparação entre diferentes produtos, indique qual deles seria a melhor escolha. Justifique sua conclusão com base nos pontos discutidos (Caso os pordutos sejam de ultolidades diferentes, escolha o que tem a melhor usabilidade)."
+                "uma comparação entre diferentes produtos, indique qual deles seria a melhor escolha. Justifique sua conclusão com base nos pontos discutidos (Caso os pordutos sejam de ultolidades diferentes, escolha o que tem a melhor usabilidade).\n"
+                "Defina no final qual é o melhor!"
         },
                 {"role": "user", "content": text}
                 ]
@@ -96,17 +97,17 @@ def processar_videos_para_resumo(urls):
     transcricoes_combinadas = ""
     
     for index, url in enumerate(urls):
-        arquivo_audio = f"audio_extraido_{index}.mp3"  # Nome único para cada áudio baixado
+        arquivo_audio = f"audio_extraido_{index}.mp3"  
         try:
             caminho_audio = baixar_audio_rapido(url, arquivo_audio)
             transcricao = transcrever_audio(caminho_audio)
-            transcricoes_combinadas += transcricao + "\n\n"  # Concatenar com separação entre transcrições
+            transcricoes_combinadas += transcricao + "\n\n"  
         except FileNotFoundError as e:
             print(e)
         except Exception as e:
             print(e)
         finally:
-            # Após transcrever, deletar o arquivo de áudio
+            
             deletar_audio(caminho_audio)
     
     return transcricoes_combinadas
@@ -114,16 +115,14 @@ def processar_videos_para_resumo(urls):
 
 # Exemplo de uso:
 urls_videos = [
-    "https://www.youtube.com/watch?v=PQUi8RgkBoM&pp=ygURaG9sbHlsYW5kIGxhcmsgbTI%3D",  # Substitua pelas URLs reais
-    "https://www.youtube.com/watch?v=zyn-84hAnxc&pp=ygURaG9sbHlsYW5kIGxhcmsgbTI%3D",
-    "https://www.youtube.com/watch?v=xlQ9nSEuayQ&t=394s&pp=ygURaG9sbHlsYW5kIGxhcmsgbTI%3D",
-    "https://www.youtube.com/watch?v=8NUZ03jTbHo&pp=ygURaG9sbHlsYW5kIGxhcmsgbTI%3D"
+    "https://www.youtube.com/watch?v=eRpVIzGdDk8&t=766s",  
+    "https://www.youtube.com/watch?v=zWk7r-s5kjI",
+    "https://www.youtube.com/watch?v=Bs_0HDhkRnI",
+    "https://www.youtube.com/watch?v=zfFdOfyTabA"
 ]
 
-# Processa os vídeos, transcreve e combina os textos
 texto_combinado = processar_videos_para_resumo(urls_videos)
 
-# Gera o resumo final com base nas transcrições combinadas
 if texto_combinado:
     resumo_final = summarize_text(texto_combinado)
     print(resumo_final)
